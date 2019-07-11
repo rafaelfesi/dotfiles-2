@@ -6,6 +6,8 @@
 	<true/>
 	<key>AboutToPasteTabsWithCancel_selection</key>
 	<integer>2</integer>
+	<key>AlternateMouseScroll</key>
+	<true/>
 	<key>AppleAntiAliasingThreshold</key>
 	<integer>1</integer>
 	<key>AppleScrollAnimationEnabled</key>
@@ -58,7 +60,7 @@
 	<key>NSWindow Frame SharedPreferences</key>
 	<string>269 172 918 423 0 0 1440 900 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>64 0 1376 877 0 0 1440 900 </string>
+	<string>52 0 1388 877 0 0 1440 900 </string>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
@@ -660,15 +662,17 @@
 	<key>NoSyncInstallationId</key>
 	<string>E14386CC-7ABC-4EF5-A7E1-D9BFF95DA93B</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>5</integer>
+	<integer>32</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
 	<integer>0</integer>
 	<key>NoSyncNextAnnoyanceTime</key>
-	<real>570805583.15230298</real>
+	<real>570906016.14570606</real>
 	<key>NoSyncOnboardingWindowHasBeenShown</key>
 	<true/>
+	<key>NoSyncPermissionToShowTip</key>
+	<false/>
 	<key>NoSyncRecordedVariables</key>
 	<dict>
 		<key>1</key>
@@ -1296,7 +1300,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2019-01-31T14:07:40Z</date>
+	<date>2019-02-20T16:34:10Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>TabStyle</key>

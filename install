@@ -11,23 +11,23 @@ declare dotfilesRepoDirectory="$dotfilesDirectory/.dotfiles"
 
 is_supported_version() {
 
-    declare -a v1=(${1//./ })
-    declare -a v2=(${2//./ })
+    declare -a v1=("${1//./ }")
+    declare -a v2=("${2//./ }")
     local i=""
 
     # Fill empty positions in v1 with zeros
-    for (( i=${#v1[@]}; i<${#v2[@]}; i++ )); do
+    for ((i = ${#v1[@]}; i < ${#v2[@]}; i++)); do
         v1[i]=0
     done
 
-    for (( i=0; i<${#v1[@]}; i++ )); do
+    for ((i = 0; i < ${#v1[@]}; i++)); do
 
         # Fill empty positions in v2 with zeros
         if [[ -z ${v2[i]} ]]; then
             v2[i]=0
         fi
 
-        if (( 10#${v1[i]} < 10#${v2[i]} )); then
+        if ((10#${v1[i]} < 10#${v2[i]})); then
             return 1
         fi
 
@@ -36,26 +36,26 @@ is_supported_version() {
 }
 
 answer_is_yes() {
-    [[ "$REPLY" =~ ^[Yy]$ ]] \
-        && return 0 \
-        || return 1
+    [[ "$REPLY" =~ ^[Yy]$ ]] &&
+        return 0 ||
+        return 1
 }
 
 ask() {
     print_question "$1"
-    read
+    read -r
 }
 
 ask_for_confirmation() {
     print_question "$1 (y/n) "
-    read -n 1
+    read -rn 1
     printf "\n"
 }
 
 ask_for_sudo() {
 
     # Ask for the administrator password upfront
-    sudo -v &> /dev/null
+    sudo -v &>/dev/null
 
     # Update existing `sudo` time stamp until this script has finished
     # https://gist.github.com/cowboy/3118588
@@ -63,50 +63,59 @@ ask_for_sudo() {
         sudo -n true
         sleep 60
         kill -0 "$$" || exit
-    done &> /dev/null &
+    done &>/dev/null &
 
 }
 
 cmd_exists() {
-    command -v "$1" &> /dev/null
+    command -v "$1" &>/dev/null
     return $?
 }
 
 execute() {
-    eval "$1" &> /dev/null
+    eval "$1" &>/dev/null
     print_result $? "${2:-$1}"
 }
 
 link_profile() {
-    if [ ! -d "~/.config/nvim" ]; then mkdir ~/.config/nvim/; fi
+    if [ ! -d "$HOME/.config/nvim" ]; then mkdir ~/.config/nvim/; fi
     ln -s "$dotfilesRepoDirectory/nvim/init.vim" ~/.config/nvim/
-    ln -s "$dotfilesRepoDirectory/bash/bashrc" $HOME/.bashrc
-    ln -s "$dotfilesRepoDirectory/bash/bash_aliases" $HOME/.bash_aliases
-    ln -s "$dotfilesRepoDirectory/git/gitconfig" $HOME/.gitconfig
-    ln -s "$dotfilesRepoDirectory/osx/osx" $HOME/.osx
-    echo "source ~/.bashrc" > $HOME/.bash_profile
+    ln -s "$dotfilesRepoDirectory/nvim/pycodestyle" ~/.config/pycodestyle
+    ln -s "$dotfilesRepoDirectory/bash/bashrc" "$HOME/.bashrc"
+    ln -s "$dotfilesRepoDirectory/bash/bash_aliases" "$HOME/.bash_aliases"
+    ln -s "$dotfilesRepoDirectory/git/gitconfig" "$HOME/.gitconfig"
+    ln -s "$dotfilesRepoDirectory/osx/osx" "$HOME/.osx"
+    echo "source ~/.bashrc" >"$HOME/.bash_profile"
     print_result $? 'Copying profile files'
 }
 
 configure_bash() {
-    if [ ! -d "~/.config" ]; then mkdir ~/.config; fi
+    if [ ! -d "$HOME/.config" ]; then mkdir ~/.config; fi
     git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
 
     # Switch to using brew-installed bash as default shell
-    if ! fgrep -q '/usr/local/bin/bash' /etc/shells; then
-      echo '/usr/local/bin/bash' | sudo tee -a /etc/shells;
-      chsh -s /usr/local/bin/bash;
-    fi;
+    if ! grep -Fq '/usr/local/bin/bash' /etc/shells; then
+        echo '/usr/local/bin/bash' | sudo tee -a /etc/shells
+        chsh -s /usr/local/bin/bash
+    fi
 }
 
-install_funcoeszz() {
-    http://funcoeszz.net/download/funcoeszz-18.3.sh
-    curl -fLo /usr/local/bin/funcoeszz http://funcoeszz.net/download/funcoeszz-18.3.sh
-    chmod +x /usr/local/bin/funcoeszz
+configure_lsp() {
+    # downloading lsp and linters/fixers
+
+    # shfmt
+    go get -u mvdan.cc/sh/cmd/shfmt
+    print_result $? "install shfmt\n"
+
+    # bingo
+    git clone https://github.com/saibing/bingo.git /tmp
+    cd /tmp/bingo || exit 1
+    GO111MODULE=on go install
+    print_result $? "install bingo\n"
 }
 
 get_answer() {
-    printf "$REPLY"
+    printf "%s" "$REPLY"
 }
 
 print_error() {
@@ -114,19 +123,19 @@ print_error() {
 }
 
 print_in_green() {
-    printf "\e[0;32m$1\e[0m"
+    printf "%s" "\e[0;32m$1\e[0m"
 }
 
 print_in_purple() {
-    printf "\e[0;35m$1\e[0m"
+    printf "%s" "\e[0;35m$1\e[0m"
 }
 
 print_in_red() {
-    printf "\e[0;31m$1\e[0m"
+    printf "%s" "\e[0;31m$1\e[0m"
 }
 
 print_in_yellow() {
-    printf "\e[0;33m$1\e[0m"
+    printf "%s" "\e[0;33m$1\e[0m"
 }
 
 print_info() {
@@ -138,11 +147,13 @@ print_question() {
 }
 
 print_result() {
-    [ $1 -eq 0 ] \
-        && print_success "$2" \
-        || print_error "$2"
+    if [[ "$1" -eq 0 ]]; then
+        print_success "$2"
+    else
+        print_error "$2"
+    fi
 
-    return $1
+    return "$1"
 }
 
 print_success() {
@@ -160,7 +171,7 @@ brew_tap() {
 
     declare -r REPOSITORY="$1"
 
-    brew tap "$REPOSITORY" &> /dev/null
+    brew tap "$REPOSITORY" &>/dev/null
     print_result $? "brew tap $REPOSITORY\n"
 
     return $?
@@ -177,11 +188,11 @@ clone_dotfiles() {
     print_info "Cloning dotfiles.."
 
     if [ -d "$dotfilesRepoDirectory" ]; then
-       print_info "Dotfiles folder already exists.. skipping"
-       return
+        print_info "Dotfiles folder already exists.. skipping"
+        return
     fi
 
-	# Cloning dotfiles on directory
+    # Cloning dotfiles on directory
     print_info "Cloning dotfiles on $dotfilesRepoDirectory"
     git clone --recursive "$DOTFILES_ORIGIN" "$dotfilesRepoDirectory"
     print_result $? 'Clone dotfiles' 'true'
@@ -208,9 +219,9 @@ verify_os() {
 
         OS_VERSION="$(sw_vers -productVersion)"
 
-        is_supported_version "$OS_VERSION" "$MINIMUM_OS_X_VERSION" \
-            && return 0 \
-            || printf "Sorry, this script is intended only for OS X $MINIMUM_OS_X_VERSION+"
+        is_supported_version "$OS_VERSION" "$MINIMUM_OS_X_VERSION" &&
+            return 0 ||
+            printf "Sorry, this script is intended only for OS X $MINIMUM_OS_X_VERSION+"
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -255,13 +266,13 @@ agree_with_xcode_licence() {
     # Automatically agree to the terms of the `Xcode` license.
     # https://github.com/alrra/dotfiles/issues/10
 
-    sudo xcodebuild -license accept &> /dev/null
+    sudo xcodebuild -license accept &>/dev/null
     print_result $? "Agree to the terms of the Xcode licence"
 
 }
 
 are_xcode_command_line_tools_installed() {
-    xcode-select --print-path &> /dev/null
+    xcode-select --print-path &>/dev/null
 }
 
 install_xcode() {
@@ -289,7 +300,7 @@ install_xcode_command_line_tools() {
     # If necessary, prompt user to install
     # the `Xcode Command Line Tools`.
 
-    xcode-select --install &> /dev/null
+    xcode-select --install &>/dev/null
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -314,7 +325,7 @@ set_xcode_developer_directory() {
     #
     # https://github.com/alrra/dotfiles/issues/13
 
-    sudo xcode-select -switch "/Applications/Xcode.app/Contents/Developer" &> /dev/null
+    sudo xcode-select -switch "/Applications/Xcode.app/Contents/Developer" &>/dev/null
     print_result $? "Make 'xcode-select' developer directory point to the appropriate directory from within Xcode.app"
 
 }
@@ -322,7 +333,7 @@ set_xcode_developer_directory() {
 install_homebrew() {
     print_info 'Install Homebrew'
     if ! cmd_exists 'brew'; then
-        printf "\n" | /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" &> /dev/null
+        printf "\n" | /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" &>/dev/null
     fi
     print_result $? 'Install Homebrew'
 }
@@ -363,8 +374,8 @@ install_brew_formulas() {
         fd
     )
 
-    for i in ${FORMULAS[@]}; do
-        brew_install ${i}
+    for i in "${FORMULAS[@]}"; do
+        brew_install "${i}"
     done
 
     # installing howebrew services
@@ -392,8 +403,8 @@ install_brew_casks() {
         openoffice
     )
 
-    for i in ${CASKS[@]}; do
-        brew_cask ${i}
+    for i in "${CASKS[@]}"; do
+        brew_cask "${i}"
     done
 
 }
@@ -416,7 +427,7 @@ main() {
     #
     # http://mywiki.wooledge.org/BashFAQ/028
 
-    cd "$(dirname "$BASH_SOURCE")"
+    # cd "$(dirname "$BASH_SOURCE")" || exit
 
     ask_for_sudo
 
@@ -428,7 +439,7 @@ main() {
         install_xcode
         set_xcode_developer_directory
         agree_with_xcode_licence
-    fi;
+    fi
 
     install_homebrew
 
@@ -451,8 +462,8 @@ main() {
     # change bash to use new version and colors
     configure_bash
 
-    # install funcoeszz
-    install_funcoeszz
+    # configure lsp
+    configure_lsp
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
