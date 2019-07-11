@@ -24,6 +24,7 @@ Plug 'sheerun/vim-polyglot'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/goyo.vim'
+Plug 'janko-m/vim-test'
 
 call plug#end()
 
@@ -126,19 +127,26 @@ let g:airline_section_y = airline#section#create_right(['linenr', '%3v'])
 let g:airline_section_z = '%{strftime("%d/%m/%Y %H:%M")}'
 
 " Configure ALE.
+highlight ALEWarning ctermbg=LightBlue
 let g:ale_completion_enabled = 1
+let g:ale_completion_delay = 10
 let g:ale_fix_on_save = 1
 let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_fixers = {
     \'*': ['remove_trailing_lines', 'trim_whitespace'],
-    \'javascript': ['prettier']
+    \'javascript': ['prettier'],
+    \'go': ['gofmt', 'goimports'],
+    \'sh': ['shfmt']
     \}
+
+ " \'python': ['black'],
 let g:ale_linters = {
 	\ 'javascript': ['eslint'],
 	\ 'python': ['pyls'],
-	\ 'bash': ['bash-language-server']
+	\ 'go': ['bingo'],
+    \ 'sh': ['shellcheck']
 	\}
 
 nnoremap <silent> K :ALEHover<CR>
@@ -197,6 +205,24 @@ let g:go_snippet_case_type = "camelcase"
 " Set auto reload file
 set autoread
 
+" ************* Python specific settings
+
+"" Mappings for vim-test in just python files for now
+autocmd FileType python nmap <silent> <leader>t :TestNearest<CR>
+autocmd FileType python nmap <silent> <leader>T :TestFile<CR>
+autocmd FileType python nmap <silent> <leader>a :TestSuite<CR>
+autocmd FileType python nmap <silent> <leader>l :TestLast<CR>
+autocmd FileType python nmap <silent> <leader>g :TestVisit<CR>
+
+"" Test strategies
+let test#strategy = {
+    \ 'nearest': 'neovim',
+    \ 'file': 'neovim',
+    \ 'suite': 'neovim',
+    \}
+let test#python#runner = 'pytest'
+let test#python#pytest#options = '-W ignore -s --cov-report term-missing'
+
 "}}}
 
 
@@ -204,6 +230,10 @@ set autoread
 "                                  Mappings
 "*****************************************************************************
 "{{{
+
+if has('nvim')
+  tmap <C-o> <C-\><C-n>
+endif
 
 " Split Screen
 noremap <Leader>h :split<CR>
