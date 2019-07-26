@@ -13,22 +13,12 @@ gop() {
     if [ "$#" -ne 1 ]; then
         echo "project missing"
     else
-        project=$(find $GOPATH/src -name $1 | head -n 1)
+        project=$(find "$GOPATH/src" -name "$1" ! -path "vendor/" | head -n 1)
         if [ -z "$project" ]; then
             echo "project $project doesn't exist"
         else
-            cd $project
+            cd "$project" || exit
         fi
-    fi
-}
-
-# Visual studio code alias
-visu() {
-    if [[ $# == 0 ]]; then
-        open -a "Visual Studio Code"
-    else
-        [[ $1 == /* ]] && F="$1" || F="$PWD/${1#./}"
-        open -a "Visual Studio Code" --args "$F"
     fi
 }
 
@@ -41,13 +31,13 @@ omo() {
     echo "Omo lava mais branco!"
 }
 
-[ -f ~/Code/sg/sg_helpers.sh ] && source ~/Code/sg/sg_helpers.sh
+[ -f "$HOME/Code/sg/sg_helpers.sh" ] && source "$HOME/Code/sg/sg_helpers.sh"
 
 # termbin
 alias tb="nc termbin.com 9999"
 
 # bat
-alias cat="bat"
+alias cat="bat -p"
 
 transfer() {
     curl --progress-bar --upload-file "$1" https://transfer.sh/"$(basename "$1")" | tee /dev/null

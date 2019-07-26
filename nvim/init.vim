@@ -42,7 +42,6 @@ Plug 'critiqjo/vim-bufferline'
 Plug 'mengelbrecht/lightline-bufferline'
 Plug 'kristijanhusak/vim-carbon-now-sh', {'on': 'CarbonNowSh'}
 Plug 'junegunn/goyo.vim', {'for': 'markdown'}
-Plug 'ryanoasis/vim-devicons'
 
 call plug#end()
 
@@ -141,11 +140,11 @@ let g:lightline = {
   \ 'active': {
   \   'left': [
   \     [ 'mode', 'paste' ],
-  \     [ 'gitbranch', 'readonly', 'filename', 'modified' ]
+  \     [ 'gitbranch', 'readonly', 'modified' ]
   \   ],
   \   'right': [['lineinfo'], ['readonly', 'linter_warnings', 'linter_errors', 'linter_ok']],
   \ },
-  \ 'tabline': {'left': [['buffers']], 'right': [['close']]},
+  \ 'tabline': {'left': [['buffers']]},
   \ 'component_expand': {
   \   'buffers': 'lightline#bufferline#buffers',
   \   'linter_warnings': 'LightlineLinterWarnings',
@@ -160,7 +159,7 @@ let g:lightline = {
   \   'linter_ok': 'left',
   \ },
   \ 'component_function': {
-  \   'gitbranch': 'fugitive#head',
+  \   'gitbranch': 'fugitive#head'
   \ }
 \ }
 
@@ -216,6 +215,19 @@ let g:ale_linters = {
 
 nnoremap <silent> K :ALEHover<CR>
 nnoremap <silent> gd :ALEGoToDefinition<CR>
+let g:ale_set_quickfix = 1
+
+" close quickfix buffer when we close last buffer tab
+au BufEnter * call MyLastWindow()
+function! MyLastWindow()
+  " if the window is quickfix go on
+  if &buftype=="quickfix"
+    " if this window is last on screen quit without warning
+    if winbufnr(2) == -1
+      quit!
+    endif
+  endif
+endfunction
 
 "}}}
 
